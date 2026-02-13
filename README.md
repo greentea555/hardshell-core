@@ -1,6 +1,6 @@
 # HardShell Core
 
-**HardShell Core** is a lightweight, secure web foundation for small sites and small communities.
+**HardShell Core** is a lightweight, secure web foundation for small sites and lightweight communities.
 
 It prioritizes:
 - **Structural security** (secure by design, not by endless configuration)
@@ -12,69 +12,111 @@ It prioritizes:
 
 ---
 
-## What it is
+## What it provides
 
-HardShell Core is a **GCP/Firebase-first** foundation that provides:
-- Headless content API (cache-first)
-- Image pipeline (original immutable + derived S/M/L)
-- Tag dictionary + gallery (multi-tag AND up to 5)
-- Lightweight community features (comments / surveys)
-- Membership (Reader) + staff roles (Editor/Designer/Admin/SuperAdmin)
-- Audit logs exported to BigQuery (including diffs)
-
----
-
-## What it is NOT
-
-HardShell Core does **not** aim to be:
-- A full enterprise CMS (SSO/SAML, advanced workflows)
-- A no-code page builder
-- A high-traffic (million MAU) platform
-- A DRM-like “content protection” system
-
-See `SPEC.md` for the full scope and non-goals.
+- **Content API** (cache-first, public/private)
+- **Image pipeline** (immutable originals + derived S/M/L, CDN-friendly)
+- **Tags & Gallery** (dictionary-based tags, multi-tag AND up to 5, tag merge)
+- **Lightweight community** (comments, surveys, soft-ban)
+- **Audit logging** (BigQuery events with diffs)
+- **Role model** (SuperAdmin / Admin / Designer / Editor / Reader / Guest)
 
 ---
 
-## Tech stack
+## Who it’s for
 
-- TypeScript (Node.js)
-- Google Cloud Run
-- Firebase Auth
-- Firestore + Cloud Storage
-- BigQuery (audit logs)
-- Cloud CDN (recommended) for `img.*`
-
----
-
-## Core principles
-
-- **Write is API-only**: clients never write to Firestore/Storage directly.
-- **Cache first**: public reads are cached (60s + ETag).
-- **Quiet private**: unauthenticated access is masked as 404; private OGP is generic.
-- **Deterministic images**: S/M/L only, webp, derived kept (no access-based deletion).
-- **Governed tags**: dictionary-only, Admin-managed, merge supported; AND max 5.
-- **Auditability**: BigQuery stores who changed what and when (with diffs).
+HardShell Core is designed for:
+- small company websites (news / pages / contact)
+- personal blogs (SEO-friendly publishing)
+- lightweight member areas (private pages)
+- photo-heavy sites (tag-based galleries)
 
 ---
 
-## Repository layout (initial)
+## Non-goals
 
-- `SPEC.md` — product spec (source of truth)
-- `openapi/` — API contract (OpenAPI)
-- `src/` — implementation
-- `docs/` — documentation (optional)
-- `.github/` — templates & automation
+HardShell Core does **not** aim to provide:
+- enterprise SSO/SAML
+- complex workflow approvals
+- unlimited tag filtering (AND is capped at 5)
+- DRM-like protection / member-only image delivery
+- “million MAU” architecture by default
+- a no-code page builder
+
+See `SPEC.md` for details.
+
+---
+
+## Architecture (high level)
+
+**Recommended production split**
+- `apps/web` → Public site (Nuxt SSR)
+- `apps/api-cloudrun` → Core API (Cloud Run, TS)
+- `apps/img` → Image & OGP service (Cloud Run + CDN)
+- `apps/api-nitro` → Optional Nitro adapter for local dev / lightweight deployments
+
+**All writes are API-only** (no direct Firestore/Storage writes from clients).
+
+---
+
+## Repository layout (monorepo)
+
+```
+hardshell-core/
+  SPEC.md
+  README.md
+  AGENTS.md
+  openapi/
+    openapi.yaml
+  packages/
+    core/              # business rules: usecases/policy/audit/diff
+    clients/           # firestore/storage/bigquery/recaptcha (thin)
+    shared/            # shared types/errors/utils
+  apps/
+    web/               # Nuxt 4 + Pug (SSR) for www.*
+    api-nitro/         # Nitro API adapter (optional)
+    api-cloudrun/      # Cloud Run API (prod)
+    img/               # Image + OGP service (prod) with CDN
+```
+
+**Rule:** business rules belong in `packages/core`. Apps are thin adapters.
+
+---
+
+## Getting started (local)
+
+> Placeholder. This will be filled as the code lands.
+
+Typical workflow (planned):
+1. Install dependencies
+2. Run dev servers (web + api-nitro)
+3. Run lint/test
+
+---
+
+## Configuration (planned)
+
+- `ADMIN_PREFIX`
+- CORS allowlist
+- Firebase / GCP credentials
+- BigQuery dataset/table for audit logs
+
+Details will be documented under `docs/` or in `SPEC.md`.
 
 ---
 
 ## Contributing
 
-HardShell Core is developed with **AI-first workflows**.
-Please read `CONTRIBUTING.md` before opening PRs.
+This project is developed **AI-first**.
+
+- `SPEC.md` is the source of truth
+- Prefer OpenAPI → implementation → tests
+- Keep PRs small and scoped
+
+See `CONTRIBUTING.md`.
 
 ---
 
 ## License
 
-TBD (choose one: Apache-2.0 / MIT)
+Apache-2.0. See `LICENSE` and `NOTICE`.

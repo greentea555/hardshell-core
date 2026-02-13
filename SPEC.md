@@ -195,3 +195,13 @@ result beforeJson afterJson diffJson
 
 HardShell Core supports: - Small company websites - Personal blogs -
 Lightweight communities - Photo-centric sites
+
+## Repository structure (monorepo)
+
+- packages/core: business logic (usecases/policy/audit)
+- apps/web: Nuxt SSR (public/private rendering)
+- apps/api-nitro: Nitro API adapter for local dev / lightweight deployments
+- apps/api-cloudrun: production API service (Cloud Run)
+- apps/img: image/OGP service (Cloud Run + CDN)
+
+Rule: Apps must not contain business rules. All domain/usecase logic lives in packages/core.
